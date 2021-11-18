@@ -1,6 +1,8 @@
 const router = require("express").Router();
 const { Tag, Product, ProductTag } = require("../../models");
 
+const inputCheck = require("../../utils/inputCheck");
+
 // The `/api/tags` endpoint
 
 router.get("/", (req, res) => {
@@ -15,7 +17,7 @@ router.get("/", (req, res) => {
       },
     ],
   })
-    .then((dbUserData) => res.json(dbUserData))
+    .then((dbTagData) => res.json(dbTagData))
     .catch((err) => {
       console.log(err);
       res.status(500).json(err);
@@ -37,12 +39,12 @@ router.get("/:id", (req, res) => {
       },
     ],
   })
-    .then((dbUserData) => {
-      if (!dbUserData) {
+    .then((dbTagData) => {
+      if (!dbTagData) {
         res.status(404).json({ message: "No tag found with this id" });
         return;
       }
-      res.json(dbUserData);
+      res.json(dbTagData);
     })
     .catch((err) => {
       console.log(err);
@@ -51,7 +53,19 @@ router.get("/:id", (req, res) => {
 });
 
 router.post("/", (req, res) => {
-  // create a new tag
+  const errors = inputCheck(req.body, "tag_name");
+  if (errors) {
+    return res.status(400).json({errors});
+  }
+  
+  Tag.create({
+    tag_name: req.body.tag_name,
+  })
+    .then((dbTagData) => res.json(dbTagData))
+    .catch((err) => {
+      console.log(err);
+      res.status(500).json(err);
+    });
 });
 
 router.put("/:id", (req, res) => {
