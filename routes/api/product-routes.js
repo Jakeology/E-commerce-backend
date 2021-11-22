@@ -102,12 +102,15 @@ router.put("/:id", (req, res) => {
         return res.status(404).json({ message: "No product found with this id" });
       }
       if (!req.body.tagIds) {
-        res.json(product);
+        return res.json(product);
       }
       // find all associated tags from ProductTag
       return ProductTag.findAll({ where: { product_id: req.params.id } });
     })
     .then((productTags) => {
+      if (!productTags[0]) {
+        return;
+      }
       if (req.body.tagIds) {
         // get list of current tag_ids
         const productTagIds = productTags.map(({ tag_id }) => tag_id);
